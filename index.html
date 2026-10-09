@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Parking System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef2f7;
+      text-align: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 24px;
+      border-radius: 15px;
+    }
+    .stats, .slots {
+      display: flex;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .card, .slot {
+      flex: 1;
+      padding: 20px 8px;
+      border-radius: 10px;
+    }
+    .card { background: #e2e8f0; }
+    .slot { background: #16a34a; color: white; }
+    .occupied { background: #dc2626; }
+    .number { font-size: 32px; font-weight: bold; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Smart Parking System</h1>
+  <p>Firebase Live Dashboard</p>
+
+  <div class="stats">
+    <div class="card">Available
+      <div class="number" id="available">--</div>
+    </div>
+    <div class="card">Occupied
+      <div class="number" id="occupied">--</div>
+    </div>
+  </div>
+
+  <div class="slots">
+    <div class="slot" id="box1">
+      <h2>Slot 1</h2>
+      <p id="slot1">Loading...</p>
+    </div>
+    <div class="slot" id="box2">
+      <h2>Slot 2</h2>
+      <p id="slot2">Loading...</p>
+    </div>
+  </div>
+
+  <p id="message">Connecting to Firebase...</p>
+</div>
+
+<script type="module">
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDZxTBK96ZWBdG7tUAfmsNT41qSNaRZdqE",
+  authDomain: "iot-with-c-program-65fcf.firebaseapp.com",
+  databaseURL: "PASTE_YOUR_REALTIME_DATABASE_URL_HERE",
+  projectId: "iot-with-c-program-65fcf",
+  storageBucket: "iot-with-c-program-65fcf.firebasestorage.app",
+  messagingSenderId: "318055029251",
+  appId: "1:318055029251:web:b63676f24f0f6485b98c36",
+  measurementId: "G-26YCH2QY5E"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+onValue(ref(db, "parking"), (snapshot) => {
+  const data = snapshot.val();
+
+  if (!data) {
+    document.getElementById("message").textContent =
+      "Connected, but no parking data found.";
+    return;
+  }
+
+  const s1 = data.slot1 === "Occupied";
+  const s2 = data.slot2 === "Occupied";
+
+  document.getElementById("slot1").textContent =
+    s1 ? "OCCUPIED" : "AVAILABLE";
+  document.getElementById("slot2").textContent =
+    s2 ? "OCCUPIED" : "AVAILABLE";
+
+  document.getElementById("box1").classList.toggle("occupied", s1);
+  document.getElementById("box2").classList.toggle("occupied", s2);
+
+  document.getElementById("available").textContent =
+    Number(!s1) + Number(!s2);
+  document.getElementById("occupied").textContent =
+    Number(s1) + Number(s2);
+
+  document.getElementById("message").textContent =
+    "Connected to Firebase";
+}, (error) => {
+  document.getElementById("message").textContent =
+    "Firebase error: " + error.message;
+});
+</script>
+</body>
+</html>
